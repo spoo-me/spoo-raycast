@@ -11,7 +11,7 @@
 <p align="center">
 <a href="https://spoo.me"><img src="https://img.shields.io/badge/spoo.me-6a5cf4?logo=https://spoo.me/static/images/favicon.png" alt="spoo.me"></a>
 <a href="https://spoo.me/discord"><img src="https://img.shields.io/discord/1192388005206433892?logo=discord" alt="Discord"></a>
-<a href="https://github.com/spoo-me/spoo-raycast/blob/main/LICENSE"><img src="https://img.shields.io/static/v1.svg?style=flat&label=License&message=APACHE-2.0&colorA=363a4f&colorB=b7bdf8" alt="License"></a>
+<a href="https://github.com/spoo-me/spoo-raycast/blob/main/LICENSE"><img src="https://img.shields.io/static/v1.svg?style=flat&label=License&message=MIT&colorA=363a4f&colorB=b7bdf8" alt="License"></a>
 </p>
 
 # 🔥 Features
@@ -106,6 +106,10 @@ src/
 └── constants.ts     # Preferences, cache keys, TTLs
 ```
 
+# 🙏 Acknowledgements
+
+- SVG chart rendering technique inspired by [GraphCalc](https://github.com/raycast/extensions/tree/main/extensions/graphcalc) by [Dru89](https://github.com/Dru89)
+
 # 🤝 Contributing
 
 **Contributions are always welcome!** 🎉
@@ -126,5 +130,5 @@ src/
 All Rights Reserved</h6>
 
 <p align="center">
- <a href="https://github.com/spoo-me/spoo-raycast/blob/main/LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=APACHE-2.0&logoColor=d9e0ee&colorA=363a4f&colorB=b7bdf8"/></a>
+ <a href="https://github.com/spoo-me/spoo-raycast/blob/main/LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=MIT&logoColor=d9e0ee&colorA=363a4f&colorB=b7bdf8"/></a>
 </p>

@@ -1,13 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spoo",
-  "title": "spoo.me",
+  "title": "Spoo.me",
   "description": "Shorten, manage, and analyze your spoo.me links without leaving your keyboard.",
   "icon": "extension-icon.png",
   "author": "zingzy",
   "platforms": ["macOS", "Windows"],
   "categories": ["Productivity", "Developer Tools", "Web"],
-  "license": "Apache-2.0",
+  "license": "MIT",
   "commands": [
     {
       "name": "quick-shorten",
@@ -57,8 +57,8 @@
       "required": false,
       "title": "API Base URL",
       "description": "Base URL of the spoo.me server. Defaults to the local dev server; set to https://spoo.me for production.",
-      "default": "http://localhost:8000",
-      "placeholder": "http://localhost:8000"
+      "default": "https://spoo.me",
+      "placeholder": "https://spoo.me"
     },
     {
       "name": "autoCopy",

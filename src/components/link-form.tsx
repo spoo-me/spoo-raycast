@@ -112,6 +112,9 @@ export function LinkForm({
   return (
     <Form
       isLoading={isLoading}
+      navigationTitle={
+        isEdit ? `Edit · ${initialValues?.alias ?? ""}` : "Shorten Link"
+      }
       actions={
         <ActionPanel>
           <Action.SubmitForm
