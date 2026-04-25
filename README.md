@@ -112,7 +112,7 @@ src/
 
 # 🙏 Acknowledgements
 
-- SVG chart rendering technique inspired by [GraphCalc](https://github.com/raycast/extensions/tree/main/extensions/graphcalc) by [Dru89](https://github.com/Dru89)
+- SVG chart rendering technique inspired by [GraphCalc](https://github.com/raycast/extensions/tree/main/extensions/graphcalc) by [cluzier](https://github.com/cluzier)
 
 # 🤝 Contributing
 
