@@ -14,7 +14,9 @@ export async function signIn(): Promise<DeviceTokenResponse> {
   const apiBaseUrl = getApiBaseUrl();
   const request = await buildAuthorizationRequest(apiBaseUrl);
   const { authorizationCode } = await oauthClient.authorize(request);
-  const tokens = await exchangeCode(apiBaseUrl, authorizationCode);
+  // The PKCE client already sent request.codeChallenge (S256) at login;
+  // redeem the code with the matching verifier the backend now requires.
+  const tokens = await exchangeCode(apiBaseUrl, authorizationCode, request.codeVerifier);
   await persistTokens(tokens.access_token, tokens.refresh_token);
   return tokens;
 }
@@ -47,11 +49,12 @@ async function persistTokens(accessToken: string, refreshToken: string) {
 async function exchangeCode(
   apiBaseUrl: string,
   code: string,
+  codeVerifier: string,
 ): Promise<DeviceTokenResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/device/token`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({ code, code_verifier: codeVerifier }),
   });
   if (!res.ok) throw await SpooError.fromResponse(res);
   return DeviceTokenResponseSchema.parse(await res.json());
