@@ -6,7 +6,7 @@ import {
 } from "@/schemas/auth";
 import { SpooError } from "@/lib/errors";
 import { buildAuthorizationRequest, oauthClient } from "@/lib/oauth";
-import { getApiBaseUrl } from "@/constants";
+import { CLIENT_HEADERS, getApiBaseUrl } from "@/constants";
 
 const ACCESS_TOKEN_TTL_SECONDS = 15 * 60;
 
@@ -63,7 +63,7 @@ async function exchangeCode(
 ): Promise<DeviceTokenResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/device/token`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...CLIENT_HEADERS, "Content-Type": "application/json" },
     body: JSON.stringify({ code, code_verifier: codeVerifier }),
   });
   if (!res.ok) throw await SpooError.fromResponse(res);
@@ -76,7 +76,7 @@ async function exchangeRefresh(
 ): Promise<DeviceRefreshResponse> {
   const res = await fetch(`${apiBaseUrl}/auth/device/refresh`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { ...CLIENT_HEADERS, "Content-Type": "application/json" },
     body: JSON.stringify({ refresh_token: refreshToken }),
   });
   if (!res.ok) throw await SpooError.fromResponse(res);
