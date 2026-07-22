@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { getApiBaseUrl } from "@/constants";
+import { CLIENT_HEADERS, getApiBaseUrl } from "@/constants";
 import { SpooError } from "@/lib/errors";
 import { getStoredTokens, refreshAccessToken } from "@/api/auth";
 
@@ -97,7 +97,7 @@ async function parseResponse<T>(
 }
 
 function authHeader(token: string): Record<string, string> {
-  return { Authorization: `Bearer ${token}` };
+  return { ...CLIENT_HEADERS, Authorization: `Bearer ${token}` };
 }
 
 function buildUrl(

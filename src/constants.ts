@@ -2,6 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 
 export const APP_ID = "spoo-raycast";
 export const DEFAULT_API_BASE_URL = "https://spoo.me";
+export const CLIENT_HEADERS = { "X-Spoo-Client": "raycast" } as const;
 
 export const CACHE_KEYS = {
   links: "cache:links",
