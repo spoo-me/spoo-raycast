@@ -13,7 +13,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { useMemo } from "react";
 import { useStats } from "@/hooks/use-stats";
-import { exportStats } from "@/api/stats";
+import { exportLinkStats } from "@/api/stats";
 import { formatClicks, formatRelative } from "@/lib/format";
 import { getStatusMeta } from "@/lib/status";
 import { renderStatsSections } from "@/components/stats-markdown";
@@ -30,8 +30,7 @@ export function LinkAnalytics({ link }: { link: UrlListItem }) {
   const alias = link.alias ?? link.id;
   const statsOptions = useMemo(
     () => ({
-      scope: "all" as const,
-      shortCode: alias,
+      urlId: link.id,
       groupBy: [
         "time",
         "country",
@@ -45,7 +44,7 @@ export function LinkAnalytics({ link }: { link: UrlListItem }) {
         .slice(0, 10),
       endDate: new Date().toISOString().slice(0, 10),
     }),
-    [alias],
+    [link.id],
   );
   const { stats, isLoading } = useStats(statsOptions);
 
@@ -79,11 +78,7 @@ export function LinkAnalytics({ link }: { link: UrlListItem }) {
       title: `Exporting as ${format.toUpperCase()}…`,
     });
     try {
-      const blob = await exportStats({
-        scope: "all",
-        format,
-        shortCode: alias,
-      });
+      const blob = await exportLinkStats(link.id, format);
       const filename = `spoo-${alias}-stats.${format}`;
       const path = join(homedir(), "Downloads", filename);
       const buffer = Buffer.from(await blob.arrayBuffer());

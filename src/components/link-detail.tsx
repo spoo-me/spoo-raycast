@@ -11,19 +11,17 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const WINDOW_DAYS = 30;
 
 export function LinkDetailSidebar({ link }: { link: UrlListItem }) {
-  const alias = link.alias ?? link.id;
   const status = getStatusMeta(link.status);
   const statsOptions = useMemo(
     () => ({
-      scope: "all" as const,
-      shortCode: alias,
+      urlId: link.id,
       groupBy: ["time"] as const,
       startDate: new Date(Date.now() - WINDOW_DAYS * DAY_MS)
         .toISOString()
         .slice(0, 10),
       endDate: new Date().toISOString().slice(0, 10),
     }),
-    [alias],
+    [link.id],
   );
   const { stats } = useStats(statsOptions);
   const windowSummary = stats ? summaryOf(stats) : null;

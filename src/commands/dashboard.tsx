@@ -47,7 +47,6 @@ function DashboardView() {
       .toISOString()
       .slice(0, 10);
     return {
-      scope: "all" as const,
       groupBy: [
         "time",
         "country",
