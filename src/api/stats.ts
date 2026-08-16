@@ -5,14 +5,32 @@ import {
   type StatsResponse,
 } from "@/schemas/stats";
 
-export interface StatsOptions {
-  groupBy?: ReadonlyArray<
-    "time" | "browser" | "os" | "country" | "city" | "referrer" | "short_code"
-  >;
+/** Dimensions every stats endpoint accepts. */
+type LinkStatsDimension =
+  | "time"
+  | "browser"
+  | "os"
+  | "country"
+  | "city"
+  | "referrer";
+
+/** The account-wide endpoint can additionally group across links. */
+type StatsDimension = LinkStatsDimension | "short_code";
+
+interface BaseStatsOptions {
   metrics?: Array<"clicks" | "unique_clicks">;
   startDate?: string;
   endDate?: string;
   timezone?: string;
+}
+
+export interface StatsOptions extends BaseStatsOptions {
+  groupBy?: ReadonlyArray<StatsDimension>;
+}
+
+/** Per-link stats reject `short_code` grouping (422 from the backend). */
+export interface LinkStatsOptions extends BaseStatsOptions {
+  groupBy?: ReadonlyArray<LinkStatsDimension>;
 }
 
 function toQuery(options: StatsOptions) {
@@ -38,7 +56,7 @@ export async function getStats(
 /** Analytics for a single owned link, addressed by its url id. */
 export async function getLinkStats(
   urlId: string,
-  options: StatsOptions = {},
+  options: LinkStatsOptions = {},
 ): Promise<StatsResponse> {
   return apiFetch(`/api/v1/stats/links/${encodeURIComponent(urlId)}`, {
     query: toQuery(options),
