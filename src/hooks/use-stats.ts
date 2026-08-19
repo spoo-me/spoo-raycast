@@ -2,7 +2,7 @@ import { getSpooClient, withAuthRetry } from "@/api/spoo";
 import { onSessionCacheClear } from "@/lib/cache";
 import { useCachedPromise, withCache } from "@raycast/utils";
 import { useMemo } from "react";
-import type { LinkStatsResponse, StatsResponse } from "spoo.me";
+import type { LinkStatsResponse, StatsResponse, UrlId } from "spoo.me";
 
 /** Dimensions every stats endpoint accepts. */
 export type LinkStatsDimension =
@@ -34,7 +34,7 @@ export type StatsQuery =
       groupBy?: ReadonlyArray<StatsDimension>;
     })
   | (BaseStatsQuery & {
-      urlId: string;
+      urlId: UrlId;
       groupBy?: ReadonlyArray<LinkStatsDimension>;
     });
 

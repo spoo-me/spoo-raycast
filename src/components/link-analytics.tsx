@@ -90,9 +90,7 @@ export function LinkAnalytics({ link }: { link: LinkItem }) {
         ),
       );
       // csv exports arrive as a ZIP archive; trust the server's filename.
-      const filename =
-        file.filename ??
-        `spoo-${alias}-stats.${format === "csv" ? "zip" : format}`;
+      const filename = file.filename;
       const path = join(homedir(), "Downloads", filename);
       const buffer = Buffer.from(await file.data.arrayBuffer());
       await writeFile(path, buffer);

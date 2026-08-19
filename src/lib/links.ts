@@ -1,5 +1,5 @@
 import { getApiBaseUrl } from "@/constants";
-import type { ApiSchema, CreatedLink, Link } from "spoo.me";
+import type { ApiSchema, CreatedLink, Link, UrlId } from "spoo.me";
 
 export type LinkStatus = ApiSchema["schemas"]["UrlStatus"];
 
@@ -10,7 +10,7 @@ export type LinkStatus = ApiSchema["schemas"]["UrlStatus"];
  * (`toDate()` in lib/format tolerates strings).
  */
 export interface LinkItem {
-  id: string;
+  id: UrlId;
   alias: string | null;
   short_url: string;
   long_url: string | null;

@@ -83,7 +83,7 @@
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",
     "qrcode": "^1.5.4",
-    "spoo.me": "^0.8.0"
+    "spoo.me": "^0.10.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
