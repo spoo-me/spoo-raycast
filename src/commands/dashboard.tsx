@@ -42,7 +42,6 @@ function DashboardView() {
   // One stats call covers both the totals + dimension breakdowns + the time
   // series for the sparkline — all aligned to the same window.
   const statsOptions = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
     const start = new Date(Date.now() - WINDOW_DAYS * DAY_MS)
       .toISOString()
       .slice(0, 10);
@@ -56,7 +55,6 @@ function DashboardView() {
         "short_code",
       ] as const,
       startDate: start,
-      endDate: today,
     };
   }, []);
   const linkOptions = useMemo(

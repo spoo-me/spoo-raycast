@@ -43,7 +43,6 @@ export function LinkAnalytics({ link }: { link: LinkItem }) {
       startDate: new Date(Date.now() - WINDOW_DAYS * DAY_MS)
         .toISOString()
         .slice(0, 10),
-      endDate: new Date().toISOString().slice(0, 10),
     }),
     [link.id],
   );
@@ -84,7 +83,6 @@ export function LinkAnalytics({ link }: { link: LinkItem }) {
           link.id,
           {
             startDate: statsOptions.startDate,
-            endDate: statsOptions.endDate,
           },
           format,
         ),
