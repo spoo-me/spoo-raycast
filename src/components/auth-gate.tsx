@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { reportError } from "@/lib/errors";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
+import { APIConnectionError } from "spoo.me";
 
 interface AuthGateProps {
   children: React.ReactNode;
@@ -52,6 +53,9 @@ export function AuthGate({ children }: AuthGateProps) {
 
 function isCancellationError(err: unknown): boolean {
   if (!err) return false;
+  // SDK connection failures ("Request aborted", timeouts) are real errors and
+  // must surface; only Raycast's own OAuth dismissal counts as a cancel.
+  if (err instanceof APIConnectionError) return false;
   const message = err instanceof Error ? err.message : String(err);
-  return /cancel|dismiss|aborted/i.test(message);
+  return /cancel|dismiss/i.test(message);
 }

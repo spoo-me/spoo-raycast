@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Form, Icon } from "@raycast/api";
-import { useEffect, useState } from "react";
 import { useAliasCheck } from "@/hooks/use-alias-check";
 import { readActiveUrl } from "@/lib/clipboard";
+import { Action, ActionPanel, Form, Icon } from "@raycast/api";
+import { useEffect, useState } from "react";
 
 const EXPIRE_PRESETS = [
   { label: "No expiry", seconds: 0 },
@@ -50,6 +50,7 @@ export interface LinkFormProps {
   skipClipboardPrefill?: boolean;
   hasPassword?: boolean;
   hasMaxClicks?: boolean;
+  hasExpiry?: boolean;
 }
 
 export function LinkForm({
@@ -60,13 +61,14 @@ export function LinkForm({
   skipClipboardPrefill,
   hasPassword,
   hasMaxClicks,
+  hasExpiry,
 }: LinkFormProps) {
   const [longUrl, setLongUrl] = useState(initialValues?.longUrl ?? "");
   const [alias, setAlias] = useState(initialValues?.alias ?? "");
   const [password, setPassword] = useState(initialValues?.password ?? "");
   const isEdit = mode === "edit";
   const [maxClicks, setMaxClicks] = useState(initialValues?.maxClicks ?? "");
-  const hasExistingExpiry = isEdit && initialValues?.expireSeconds != null;
+  const hasExistingExpiry = isEdit && !!hasExpiry;
   const [expireValue, setExpireValue] = useState(
     hasExistingExpiry ? "keep" : "none",
   );
@@ -191,7 +193,7 @@ export function LinkForm({
         value={expireValue}
         onChange={setExpireValue}
       >
-        {isEdit && initialValues?.expireSeconds != null ? (
+        {hasExistingExpiry ? (
           <Form.Dropdown.Item title="Keep current" value="keep" />
         ) : null}
         {buildExpireOptions().map((opt) => (

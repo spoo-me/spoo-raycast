@@ -1,12 +1,12 @@
-import { formatClicks } from "@/lib/format";
 import { countryDisplay } from "@/lib/emoji-flag";
-import { barChart, toMarkdownImage } from "@/lib/svg-chart";
+import { formatClicks } from "@/lib/format";
 import {
-  getBreakdown,
   type BreakdownRow,
   type DimensionName,
-  type StatsResponse,
-} from "@/schemas/stats";
+  type StatsLike,
+  getBreakdown,
+} from "@/lib/stats-select";
+import { barChart, toMarkdownImage } from "@/lib/svg-chart";
 
 export interface RenderStatsOptions {
   chartWidth?: number;
@@ -24,7 +24,7 @@ const SECTIONS: Array<{
 ];
 
 export function renderStatsSections(
-  stats: StatsResponse | undefined,
+  stats: StatsLike | undefined,
   options: RenderStatsOptions = {},
 ): string {
   if (!stats) return "";

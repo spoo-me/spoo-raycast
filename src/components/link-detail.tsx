@@ -1,16 +1,16 @@
+import { useStats } from "@/hooks/use-stats";
+import { formatClicks, formatRelative } from "@/lib/format";
+import type { LinkItem } from "@/lib/links";
+import { summaryOf } from "@/lib/stats-select";
+import { getStatusMeta } from "@/lib/status";
 import { Color, Icon, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useMemo } from "react";
-import { useStats } from "@/hooks/use-stats";
-import { formatClicks, formatRelative } from "@/lib/format";
-import { getStatusMeta } from "@/lib/status";
-import { summaryOf } from "@/schemas/stats";
-import type { UrlListItem } from "@/schemas/url";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WINDOW_DAYS = 30;
 
-export function LinkDetailSidebar({ link }: { link: UrlListItem }) {
+export function LinkDetailSidebar({ link }: { link: LinkItem }) {
   const status = getStatusMeta(link.status);
   const statsOptions = useMemo(
     () => ({

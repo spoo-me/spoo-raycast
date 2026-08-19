@@ -1,5 +1,5 @@
+import type { LinkStatus } from "@/lib/links";
 import { Color, Icon } from "@raycast/api";
-import type { UrlStatus } from "@/schemas/url";
 
 export interface StatusMeta {
   label: string;
@@ -7,7 +7,7 @@ export interface StatusMeta {
   tintColor: Color;
 }
 
-const META: Record<UrlStatus, StatusMeta> = {
+const META: Record<LinkStatus, StatusMeta> = {
   ACTIVE: { label: "Active", icon: Icon.CircleFilled, tintColor: Color.Green },
   INACTIVE: {
     label: "Inactive",
@@ -19,7 +19,7 @@ const META: Record<UrlStatus, StatusMeta> = {
 };
 
 export function getStatusMeta(
-  status: UrlStatus | null | undefined,
+  status: LinkStatus | null | undefined,
 ): StatusMeta {
   return status ? META[status] : META.INACTIVE;
 }

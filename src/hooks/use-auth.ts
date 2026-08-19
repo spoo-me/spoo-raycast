@@ -1,27 +1,24 @@
-import { useCallback } from "react";
-import { useCachedPromise } from "@raycast/utils";
-import { z } from "zod";
 import {
   getStoredTokens,
   signIn as signInApi,
   signOut as signOutApi,
 } from "@/api/auth";
-import { apiFetch } from "@/api/client";
-import { UserProfileSchema, type UserProfile } from "@/schemas/auth";
+import { getSpooClient, withAuthRetry } from "@/api/spoo";
+import { useCachedPromise } from "@raycast/utils";
+import { useCallback } from "react";
+import type { UserProfile } from "spoo.me";
 
 interface AuthState {
   user: UserProfile | null;
   isAuthenticated: boolean;
 }
 
-const AuthMeSchema = z.object({ user: UserProfileSchema });
-
 async function loadAuthState(): Promise<AuthState> {
   const tokens = await getStoredTokens();
   if (!tokens?.accessToken) return { user: null, isAuthenticated: false };
 
   try {
-    const { user } = await apiFetch("/auth/me", { schema: AuthMeSchema });
+    const user = await withAuthRetry(() => getSpooClient().auth.me());
     return { user, isAuthenticated: true };
   } catch {
     return { user: null, isAuthenticated: false };

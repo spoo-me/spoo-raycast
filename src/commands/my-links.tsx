@@ -1,15 +1,15 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useState } from "react";
 import { AuthGate } from "@/components/auth-gate";
 import { EmptyLinks } from "@/components/empty-state";
 import { LinkActions } from "@/components/link-actions";
 import { LinkDetailSidebar } from "@/components/link-detail";
 import { LinkListItem } from "@/components/link-list-item";
 import { useLinks } from "@/hooks/use-links";
-import type { SortField, SortOrder } from "@/api/urls";
-import type { UrlStatus } from "@/schemas/url";
+import type { SortField, SortOrder } from "@/hooks/use-links";
+import type { LinkStatus } from "@/lib/links";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useState } from "react";
 
-type StatusFilter = "all" | UrlStatus;
+type StatusFilter = "all" | LinkStatus;
 
 interface SortOption {
   label: string;
@@ -18,17 +18,25 @@ interface SortOption {
 }
 
 const SORT_OPTIONS: Record<string, SortOption> = {
-  newest: { label: "Newest first", sortBy: "created_at", sortOrder: "desc" },
-  oldest: { label: "Oldest first", sortBy: "created_at", sortOrder: "asc" },
+  newest: {
+    label: "Newest first",
+    sortBy: "created_at",
+    sortOrder: "descending",
+  },
+  oldest: {
+    label: "Oldest first",
+    sortBy: "created_at",
+    sortOrder: "ascending",
+  },
   "most-clicked": {
     label: "Most clicked",
     sortBy: "total_clicks",
-    sortOrder: "desc",
+    sortOrder: "descending",
   },
   "last-clicked": {
     label: "Last clicked",
     sortBy: "last_click",
-    sortOrder: "desc",
+    sortOrder: "descending",
   },
 };
 

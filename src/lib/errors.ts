@@ -1,5 +1,11 @@
 import { Toast, showToast } from "@raycast/api";
-import { ApiErrorSchema } from "@/schemas/auth";
+import {
+  APIConnectionError,
+  APIError,
+  APITimeoutError,
+  RateLimitError,
+  SessionExpiredError,
+} from "spoo.me";
 
 const FRIENDLY_MESSAGES: Record<string, string> = {
   validation_error: "Check the input and try again.",
@@ -10,6 +16,14 @@ const FRIENDLY_MESSAGES: Record<string, string> = {
   gone: "This link has expired.",
   blocked: "This URL was flagged as malicious.",
   rate_limit_exceeded: "Slow down — you've hit the rate limit.",
+  password_required: "This link is password-protected.",
+  invalid_password: "That password is incorrect.",
+  feature_disabled: "Your account doesn't have access to this feature.",
+  EMAIL_NOT_VERIFIED: "Verify your email address first.",
+  payload_too_large: "That's too large for the server to accept.",
+  http_502: "spoo.me is having a moment. Try again shortly.",
+  http_503: "spoo.me is having a moment. Try again shortly.",
+  http_504: "spoo.me is having a moment. Try again shortly.",
 };
 
 const EMOJI: Record<string, string> = {
@@ -20,77 +34,45 @@ const EMOJI: Record<string, string> = {
   conflict: "🔒",
 };
 
-export class SpooError extends Error {
-  readonly status: number;
-  readonly code: string;
-  readonly field?: string;
-
-  constructor(status: number, code: string, message: string, field?: string) {
-    super(message);
-    this.status = status;
-    this.code = code;
-    this.field = field;
-    this.name = "SpooError";
+export function friendlyMessage(err: unknown): string {
+  if (err instanceof SessionExpiredError) {
+    return "Session expired. Please sign in again.";
   }
-
-  static async fromResponse(response: Response): Promise<SpooError> {
-    const code = mapStatusToDefaultCode(response.status);
-    let payload: unknown;
-    try {
-      payload = await response.json();
-    } catch {
-      return new SpooError(
-        response.status,
-        code,
-        response.statusText || "Request failed",
-      );
-    }
-    const parsed = ApiErrorSchema.safeParse(payload);
-    if (!parsed.success) {
-      return new SpooError(
-        response.status,
-        code,
-        response.statusText || "Request failed",
-      );
-    }
-    return new SpooError(
-      response.status,
-      parsed.data.code ?? code,
-      parsed.data.error,
-      parsed.data.field,
-    );
+  if (err instanceof APITimeoutError) {
+    return "spoo.me took too long to respond. Try again.";
   }
-
-  get friendlyMessage(): string {
-    const base = FRIENDLY_MESSAGES[this.code];
-    return base ? `${base} ${this.message}`.trim() : this.message;
+  if (err instanceof APIConnectionError) {
+    return "Couldn't reach spoo.me. Check your connection.";
   }
-
-  async toast(): Promise<void> {
-    const emoji = EMOJI[this.code] ?? "";
-    await showToast({
-      style: Toast.Style.Failure,
-      title: `${emoji} ${this.friendlyMessage}`.trim(),
-      message: this.field ? `Field: ${this.field}` : undefined,
-    });
+  if (err instanceof APIError) {
+    const base = FRIENDLY_MESSAGES[err.code];
+    const detail = err.body.error;
+    return base ? `${base} ${detail}`.trim() : detail;
   }
-}
-
-function mapStatusToDefaultCode(status: number): string {
-  if (status === 400) return "validation_error";
-  if (status === 401) return "authentication_error";
-  if (status === 403) return "forbidden";
-  if (status === 404) return "not_found";
-  if (status === 409) return "conflict";
-  if (status === 410) return "gone";
-  if (status === 429) return "rate_limit_exceeded";
-  if (status === 451) return "blocked";
-  return "error";
+  return err instanceof Error ? err.message : String(err);
 }
 
 export async function reportError(err: unknown): Promise<void> {
-  if (err instanceof SpooError) {
-    await err.toast();
+  if (err instanceof APIError) {
+    const emoji = EMOJI[err.code] ?? "";
+    const retryAfter =
+      err instanceof RateLimitError ? err.rateLimit.retryAfter : undefined;
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `${emoji} ${friendlyMessage(err)}`.trim(),
+      message: retryAfter
+        ? `Retry in ${retryAfter}s`
+        : err.field
+          ? `Field: ${err.field}`
+          : undefined,
+    });
+    return;
+  }
+  if (err instanceof SessionExpiredError || err instanceof APIConnectionError) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: friendlyMessage(err),
+    });
     return;
   }
   await showToast({

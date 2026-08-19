@@ -1,3 +1,11 @@
+import { writeFile } from "node:fs/promises";
+import { homedir, tmpdir } from "node:os";
+import { join } from "node:path";
+import { reportError } from "@/lib/errors";
+import { formatRelative } from "@/lib/format";
+import type { LinkItem } from "@/lib/links";
+import { QR_DARK, QR_LIGHT, markdownImage, toDataUrl } from "@/lib/qrcode";
+import { getStatusMeta } from "@/lib/status";
 import {
   Action,
   ActionPanel,
@@ -8,23 +16,15 @@ import {
   Toast,
   showToast,
 } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
-import { useEffect, useState } from "react";
-import { writeFile } from "node:fs/promises";
-import { homedir, tmpdir } from "node:os";
-import { join } from "node:path";
 import { environment } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import QRCode from "qrcode";
-import { QR_DARK, QR_LIGHT, markdownImage, toDataUrl } from "@/lib/qrcode";
-import { formatRelative } from "@/lib/format";
-import { getStatusMeta } from "@/lib/status";
-import { reportError } from "@/lib/errors";
-import type { UrlListItem } from "@/schemas/url";
+import { useEffect, useState } from "react";
 
 const QR_PREVIEW_SIZE = 200;
 const QR_EXPORT_SIZE = 1024;
 
-export function LinkQrView({ link }: { link: UrlListItem }) {
+export function LinkQrView({ link }: { link: LinkItem }) {
   const alias = link.alias ?? link.id;
   const destinationHost = link.long_url ? safeHostname(link.long_url) : null;
   const [qrDataUrl, setQrDataUrl] = useState("");

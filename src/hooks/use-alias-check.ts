@@ -1,13 +1,23 @@
-import { useEffect, useState } from "react";
-import { usePromise } from "@raycast/utils";
-import { checkAlias } from "@/api/urls";
+import { getSpooClient, withAuthRetry } from "@/api/spoo";
 import { DEBOUNCE_MS } from "@/constants";
-import type { AliasAvailability } from "@/schemas/url";
+import { usePromise } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import type { ApiSchema } from "spoo.me";
+
+type AliasAvailability = ApiSchema["schemas"]["AliasCheckResponse"];
 
 interface UseAliasCheckResult {
   availability: AliasAvailability | undefined;
   isChecking: boolean;
   error: string | undefined;
+}
+
+async function checkAlias(alias: string): Promise<AliasAvailability> {
+  // No retries: a stale availability verdict is worse than a missed one, and
+  // the user is still typing anyway.
+  return withAuthRetry(() =>
+    getSpooClient().links.checkAlias(alias, undefined, { maxRetries: 0 }),
+  );
 }
 
 export function useAliasCheck(alias: string): UseAliasCheckResult {
@@ -43,10 +53,14 @@ function describeError(
   switch (avail.reason) {
     case "taken":
       return "This alias is already taken.";
+    case "reserved":
+      return "This alias is reserved.";
     case "format":
       return "Only letters, numbers, hyphens, and underscores allowed.";
     case "length":
       return "Alias must be between 3 and 16 characters.";
+    case "emoji_policy":
+      return "This emoji combination isn't supported.";
     default:
       return "This alias is unavailable.";
   }

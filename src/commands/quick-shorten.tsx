@@ -1,17 +1,17 @@
+import { getStoredTokens } from "@/api/auth";
+import { getSpooClient, withAuthRetry } from "@/api/spoo";
+import { getPreferences } from "@/constants";
+import { isUrl, readActiveUrl } from "@/lib/clipboard";
+import { reportError } from "@/lib/errors";
 import {
   Clipboard,
-  LaunchProps,
+  type LaunchProps,
   LaunchType,
   Toast,
   launchCommand,
   showHUD,
   showToast,
 } from "@raycast/api";
-import { shortenUrl } from "@/api/urls";
-import { getStoredTokens } from "@/api/auth";
-import { isUrl, readActiveUrl } from "@/lib/clipboard";
-import { reportError } from "@/lib/errors";
-import { getPreferences } from "@/constants";
 
 interface QuickShortenArgs {
   url?: string;
@@ -46,7 +46,9 @@ export default async function QuickShorten(
     title: "Shortening…",
   });
   try {
-    const result = await shortenUrl({ long_url: url });
+    const result = await withAuthRetry(() =>
+      getSpooClient().links.create({ long_url: url }),
+    );
     const { autoCopy, celebrate } = getPreferences();
     if (autoCopy) await Clipboard.copy(result.short_url);
 
