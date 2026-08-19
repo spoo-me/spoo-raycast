@@ -1,6 +1,6 @@
-import { Action, Alert, Icon, confirmAlert } from "@raycast/api";
 import { useAuth } from "@/hooks/use-auth";
 import { reportError } from "@/lib/errors";
+import { Action, Alert, Icon, confirmAlert } from "@raycast/api";
 
 export function SignOutAction() {
   const { isAuthenticated, signOut, user } = useAuth();

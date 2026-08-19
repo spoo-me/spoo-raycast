@@ -1,3 +1,19 @@
+import { AuthGate } from "@/components/auth-gate";
+import { LinkAnalytics } from "@/components/link-analytics";
+import { LinkDetailSidebar } from "@/components/link-detail";
+import { useLinks } from "@/hooks/use-links";
+import { useStats } from "@/hooks/use-stats";
+import { countryDisplay } from "@/lib/emoji-flag";
+import { formatClicks } from "@/lib/format";
+import type { LinkItem } from "@/lib/links";
+import {
+  type BreakdownRow,
+  type DimensionName,
+  getBreakdown,
+  getTimeSeries,
+  summaryOf,
+} from "@/lib/stats-select";
+import { barChart, lineChart, toMarkdownImage } from "@/lib/svg-chart";
 import {
   Action,
   ActionPanel,
@@ -7,22 +23,6 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useMemo } from "react";
-import { AuthGate } from "@/components/auth-gate";
-import { LinkAnalytics } from "@/components/link-analytics";
-import { LinkDetailSidebar } from "@/components/link-detail";
-import { useLinks } from "@/hooks/use-links";
-import { useStats } from "@/hooks/use-stats";
-import { formatClicks } from "@/lib/format";
-import { countryDisplay } from "@/lib/emoji-flag";
-import { barChart, lineChart, toMarkdownImage } from "@/lib/svg-chart";
-import {
-  getBreakdown,
-  getTimeSeries,
-  summaryOf,
-  type BreakdownRow,
-  type DimensionName,
-} from "@/schemas/stats";
-import type { UrlListItem } from "@/schemas/url";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -42,7 +42,6 @@ function DashboardView() {
   // One stats call covers both the totals + dimension breakdowns + the time
   // series for the sparkline — all aligned to the same window.
   const statsOptions = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
     const start = new Date(Date.now() - WINDOW_DAYS * DAY_MS)
       .toISOString()
       .slice(0, 10);
@@ -56,13 +55,12 @@ function DashboardView() {
         "short_code",
       ] as const,
       startDate: start,
-      endDate: today,
     };
   }, []);
   const linkOptions = useMemo(
     () => ({
       sortBy: "total_clicks" as const,
-      sortOrder: "desc" as const,
+      sortOrder: "descending" as const,
       pageSize: 100,
     }),
     [],
@@ -89,7 +87,7 @@ function DashboardView() {
   const topLinkRows = getBreakdown(stats, "clicks", "short_code");
 
   const linkByAlias = useMemo(() => {
-    const map = new Map<string, UrlListItem>();
+    const map = new Map<string, LinkItem>();
     for (const link of links) map.set(link.alias ?? link.id, link);
     return map;
   }, [links]);
@@ -102,9 +100,7 @@ function DashboardView() {
       windowClicks: row.value,
     }))
     .filter(
-      (
-        row,
-      ): row is { link: UrlListItem; alias: string; windowClicks: number } =>
+      (row): row is { link: LinkItem; alias: string; windowClicks: number } =>
         !!row.link,
     );
 
@@ -307,7 +303,7 @@ function TopLinkItem({
   rank,
   windowClicks,
 }: {
-  link: UrlListItem;
+  link: LinkItem;
   rank: number;
   windowClicks: number;
 }) {

@@ -1,4 +1,9 @@
-import type React from "react";
+import { getSpooClient, withAuthRetry } from "@/api/spoo";
+import { EditLinkView } from "@/components/edit-link";
+import { LinkAnalytics } from "@/components/link-analytics";
+import { LinkQrView } from "@/components/link-qr";
+import { reportError } from "@/lib/errors";
+import type { LinkItem } from "@/lib/links";
 import {
   Action,
   ActionPanel,
@@ -8,15 +13,10 @@ import {
   confirmAlert,
   useNavigation,
 } from "@raycast/api";
-import { reportError } from "@/lib/errors";
-import { deleteUrl, setUrlStatus } from "@/api/urls";
-import type { UrlListItem } from "@/schemas/url";
-import { EditLinkView } from "@/components/edit-link";
-import { LinkAnalytics } from "@/components/link-analytics";
-import { LinkQrView } from "@/components/link-qr";
+import type React from "react";
 
 interface LinkActionsProps {
-  link: UrlListItem;
+  link: LinkItem;
   onMutated: () => void;
   children?: React.ReactElement | React.ReactElement[];
 }
@@ -27,7 +27,12 @@ export function LinkActions({ link, onMutated, children }: LinkActionsProps) {
 
   const handleToggleStatus = async () => {
     try {
-      await setUrlStatus(link.id, isActive ? "INACTIVE" : "ACTIVE");
+      await withAuthRetry(() =>
+        getSpooClient().links.setStatus(
+          link.id,
+          isActive ? "INACTIVE" : "ACTIVE",
+        ),
+      );
       onMutated();
     } catch (err) {
       await reportError(err);
@@ -42,7 +47,7 @@ export function LinkActions({ link, onMutated, children }: LinkActionsProps) {
     });
     if (!confirmed) return;
     try {
-      await deleteUrl(link.id);
+      await withAuthRetry(() => getSpooClient().links.delete(link.id));
       onMutated();
     } catch (err) {
       await reportError(err);

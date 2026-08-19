@@ -1,12 +1,13 @@
+import { getSpooClient, withAuthRetry } from "@/api/spoo";
+import { LinkForm, type LinkFormValues } from "@/components/link-form";
+import { reportError } from "@/lib/errors";
+import type { LinkItem } from "@/lib/links";
 import { Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import { LinkForm, type LinkFormValues } from "@/components/link-form";
-import { updateUrl } from "@/api/urls";
-import { reportError } from "@/lib/errors";
-import type { UrlListItem } from "@/schemas/url";
+import type { UpdateLinkParams } from "spoo.me";
 
 interface EditLinkViewProps {
-  link: UrlListItem;
+  link: LinkItem;
   onMutated: () => void;
 }
 
@@ -24,28 +25,36 @@ export function EditLinkView({ link, onMutated }: EditLinkViewProps) {
       const maxClicks = values.maxClicks
         ? Number.parseInt(values.maxClicks, 10)
         : undefined;
-      // -1 = "keep current", null = "no expiry", >0 = new duration
-      const expireAfter =
+      // The form emits a duration; the API wants an absolute timestamp.
+      // -1 = "keep current" (omit), null = "no expiry" (clear when one exists),
+      // >0 = new duration from now.
+      const expireAfter: UpdateLinkParams["expire_after"] =
         values.expireSeconds === -1
           ? undefined
-          : (values.expireSeconds ?? undefined);
+          : values.expireSeconds === null
+            ? link.expire_after !== null
+              ? null
+              : undefined
+            : new Date(Date.now() + values.expireSeconds * 1000);
 
       const originalAlias = link.alias ?? link.id;
       const aliasChanged = values.alias && values.alias !== originalAlias;
 
-      await updateUrl(link.id, {
-        long_url: values.longUrl,
-        alias: aliasChanged ? values.alias : undefined,
-        password: values.removePassword ? null : values.password || undefined,
-        max_clicks: values.removeMaxClicks
-          ? 0
-          : Number.isFinite(maxClicks as number)
-            ? maxClicks
-            : undefined,
-        expire_after: expireAfter && expireAfter > 0 ? expireAfter : undefined,
-        block_bots: values.blockBots,
-        private_stats: values.privateStats,
-      });
+      await withAuthRetry(() =>
+        getSpooClient().links.update(link.id, {
+          long_url: values.longUrl,
+          alias: aliasChanged ? values.alias : undefined,
+          password: values.removePassword ? null : values.password || undefined,
+          max_clicks: values.removeMaxClicks
+            ? null
+            : Number.isFinite(maxClicks as number)
+              ? maxClicks
+              : undefined,
+          expire_after: expireAfter,
+          block_bots: values.blockBots,
+          private_stats: values.privateStats,
+        }),
+      );
 
       toast.style = Toast.Style.Success;
       toast.title = "Link updated";
@@ -66,7 +75,6 @@ export function EditLinkView({ link, onMutated }: EditLinkViewProps) {
         longUrl: link.long_url ?? "",
         alias: link.alias ?? link.id,
         maxClicks: link.max_clicks ? String(link.max_clicks) : "",
-        expireSeconds: link.expire_after ?? null,
         blockBots: link.block_bots ?? false,
         privateStats: link.private_stats ?? false,
       }}
@@ -75,6 +83,7 @@ export function EditLinkView({ link, onMutated }: EditLinkViewProps) {
       skipClipboardPrefill
       hasPassword={link.password_set}
       hasMaxClicks={!!link.max_clicks}
+      hasExpiry={link.expire_after !== null}
     />
   );
 }

@@ -1,4 +1,3 @@
-import { Color, Icon, List } from "@raycast/api";
 import {
   formatClicks,
   formatRelative,
@@ -6,11 +5,12 @@ import {
   toDate,
   truncate,
 } from "@/lib/format";
+import type { LinkItem } from "@/lib/links";
 import { getStatusMeta } from "@/lib/status";
-import type { UrlListItem } from "@/schemas/url";
+import { Color, Icon, List } from "@raycast/api";
 
 export interface LinkListItemProps {
-  link: UrlListItem;
+  link: LinkItem;
   actions: React.ReactNode;
   detail?: React.ReactNode;
   showAccessories?: boolean;
@@ -39,7 +39,7 @@ export function LinkListItem({
   );
 }
 
-function statusIcon(link: UrlListItem) {
+function statusIcon(link: LinkItem) {
   if (link.status && link.status !== "ACTIVE") {
     const meta = getStatusMeta(link.status);
     return { source: meta.icon, tintColor: meta.tintColor };
@@ -48,7 +48,7 @@ function statusIcon(link: UrlListItem) {
   return { source: Icon.Link, tintColor: Color.Blue };
 }
 
-function buildAccessories(link: UrlListItem): List.Item.Accessory[] {
+function buildAccessories(link: LinkItem): List.Item.Accessory[] {
   const totalClicks = link.total_clicks ?? 0;
   const accessories: List.Item.Accessory[] = [
     {

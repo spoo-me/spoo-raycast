@@ -2,7 +2,9 @@ import { getPreferenceValues } from "@raycast/api";
 
 export const APP_ID = "spoo-raycast";
 export const DEFAULT_API_BASE_URL = "https://spoo.me";
-export const CLIENT_HEADERS = { "X-Spoo-Client": "raycast" } as const;
+/** Extension version — keep in sync with the latest CHANGELOG entry. */
+export const VERSION = "1.0.0";
+export const CLIENT_TAG = `raycast/${VERSION}`;
 
 export const CACHE_KEYS = {
   links: "cache:links",

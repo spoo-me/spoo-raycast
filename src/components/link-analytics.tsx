@@ -1,3 +1,15 @@
+import { writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { getSpooClient, withAuthRetry } from "@/api/spoo";
+import { renderStatsSections } from "@/components/stats-markdown";
+import { useStats } from "@/hooks/use-stats";
+import { reportError } from "@/lib/errors";
+import { formatClicks, formatRelative } from "@/lib/format";
+import type { LinkItem } from "@/lib/links";
+import { getTimeSeries, summaryOf } from "@/lib/stats-select";
+import { getStatusMeta } from "@/lib/status";
+import { lineChart, toMarkdownImage } from "@/lib/svg-chart";
 import {
   Action,
   ActionPanel,
@@ -8,25 +20,14 @@ import {
   showToast,
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
-import { writeFile } from "node:fs/promises";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { useMemo } from "react";
-import { useStats } from "@/hooks/use-stats";
-import { exportLinkStats } from "@/api/stats";
-import { formatClicks, formatRelative } from "@/lib/format";
-import { getStatusMeta } from "@/lib/status";
-import { renderStatsSections } from "@/components/stats-markdown";
-import { getTimeSeries, summaryOf, type ExportFormat } from "@/schemas/stats";
-import { lineChart, toMarkdownImage } from "@/lib/svg-chart";
-import type { UrlListItem } from "@/schemas/url";
-import { reportError } from "@/lib/errors";
+import type { StatsExportFormat } from "spoo.me";
 
-const EXPORT_FORMATS: ExportFormat[] = ["csv", "json", "xlsx", "xml"];
+const EXPORT_FORMATS: StatsExportFormat[] = ["csv", "json", "xlsx", "xml"];
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WINDOW_DAYS = 30;
 
-export function LinkAnalytics({ link }: { link: UrlListItem }) {
+export function LinkAnalytics({ link }: { link: LinkItem }) {
   const alias = link.alias ?? link.id;
   const statsOptions = useMemo(
     () => ({
@@ -42,7 +43,6 @@ export function LinkAnalytics({ link }: { link: UrlListItem }) {
       startDate: new Date(Date.now() - WINDOW_DAYS * DAY_MS)
         .toISOString()
         .slice(0, 10),
-      endDate: new Date().toISOString().slice(0, 10),
     }),
     [link.id],
   );
@@ -72,20 +72,29 @@ export function LinkAnalytics({ link }: { link: UrlListItem }) {
   if (breakdowns) sections.push("", breakdowns);
   const markdown = sections.join("\n");
 
-  const handleExport = async (format: ExportFormat) => {
+  const handleExport = async (format: StatsExportFormat) => {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Exporting as ${format.toUpperCase()}…`,
     });
     try {
-      const blob = await exportLinkStats(link.id, format);
-      const filename = `spoo-${alias}-stats.${format}`;
+      const file = await withAuthRetry(() =>
+        getSpooClient().stats.exportForLink(
+          link.id,
+          {
+            startDate: statsOptions.startDate,
+          },
+          format,
+        ),
+      );
+      // csv exports arrive as a ZIP archive; trust the server's filename.
+      const filename = file.filename;
       const path = join(homedir(), "Downloads", filename);
-      const buffer = Buffer.from(await blob.arrayBuffer());
+      const buffer = Buffer.from(await file.data.arrayBuffer());
       await writeFile(path, buffer);
-      const size = (blob.size / 1024).toFixed(1);
+      const size = (file.data.size / 1024).toFixed(1);
       toast.style = Toast.Style.Success;
-      toast.title = `Saved to Downloads`;
+      toast.title = "Saved to Downloads";
       toast.message = `${filename} (${size} KB)`;
     } catch (err) {
       toast.hide();

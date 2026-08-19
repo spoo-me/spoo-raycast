@@ -1,6 +1,9 @@
+import { CACHE_KEYS } from "@/constants";
 import { Cache } from "@raycast/api";
 
 const cache = new Cache();
+const SCOPE_KEY = "cache:scope";
+const clearers: Array<() => void> = [];
 
 interface CacheEntry<T> {
   data: T;
@@ -29,4 +32,26 @@ export function writeCached<T>(key: string, value: T): void {
 
 export function clearCached(key: string): void {
   cache.remove(key);
+}
+
+/** Register extra cleanup to run whenever the session cache is dropped. */
+export function onSessionCacheClear(fn: () => void): void {
+  clearers.push(fn);
+}
+
+/**
+ * Drop every cached snapshot tied to the signed-in account. The shared Cache
+ * outlives the OAuth session, so sign-out/session-expiry must clear it or the
+ * next account briefly sees the previous account's links.
+ */
+export function clearSessionCache(): void {
+  for (const key of Object.values(CACHE_KEYS)) cache.remove(key);
+  for (const clear of clearers) clear();
+}
+
+/** Cached snapshots are per-server: invalidate them when the base URL changes. */
+export function ensureCacheScope(baseUrl: string): void {
+  if (cache.get(SCOPE_KEY) === baseUrl) return;
+  clearSessionCache();
+  cache.set(SCOPE_KEY, baseUrl);
 }

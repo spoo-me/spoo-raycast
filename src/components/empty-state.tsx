@@ -1,3 +1,4 @@
+import ShortenCommand from "@/commands/shorten";
 import {
   Action,
   ActionPanel,
@@ -6,7 +7,6 @@ import {
   List,
   useNavigation,
 } from "@raycast/api";
-import ShortenCommand from "@/commands/shorten";
 
 export function EmptyLinks() {
   const { push } = useNavigation();
