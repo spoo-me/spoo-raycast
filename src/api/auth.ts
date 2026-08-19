@@ -1,4 +1,5 @@
 import { CLIENT_TAG, getApiBaseUrl } from "@/constants";
+import { clearSessionCache } from "@/lib/cache";
 import { buildAuthorizationRequest, oauthClient } from "@/lib/oauth";
 import { type DeviceTokens, Spoo, type TokenProvider } from "spoo.me";
 
@@ -67,6 +68,7 @@ export function invalidateCredential(): void {
 /** The refresh token was rejected — drop the session so sign-in resurfaces. */
 export async function clearSession(): Promise<void> {
   credential = undefined;
+  clearSessionCache();
   await oauthClient.removeTokens();
 }
 

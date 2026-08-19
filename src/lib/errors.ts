@@ -46,6 +46,14 @@ export function friendlyMessage(err: unknown): string {
   }
   if (err instanceof APIError) {
     const base = FRIENDLY_MESSAGES[err.code];
+    // http_* codes are synthesized from non-JSON responses (proxy or edge
+    // error pages); never surface their body text in a toast.
+    if (/^http_\d+$/.test(err.code)) {
+      return (
+        base ??
+        `The server returned an unexpected response (HTTP ${err.status}).`
+      );
+    }
     const detail = err.body.error;
     return base ? `${base} ${detail}`.trim() : detail;
   }

@@ -1,4 +1,5 @@
 import { getSpooClient, withAuthRetry } from "@/api/spoo";
+import { onSessionCacheClear } from "@/lib/cache";
 import { useCachedPromise, withCache } from "@raycast/utils";
 import { useMemo } from "react";
 import type { LinkStatsResponse, StatsResponse } from "spoo.me";
@@ -38,9 +39,6 @@ export type StatsQuery =
     });
 
 const STATS_TTL_MS = 60_000;
-// Short per-request timeout: these calls render sidebars, so SDK retries must
-// never stack up behind the UI.
-const STATS_REQUEST = { timeout: 10_000 } as const;
 
 async function fetchStats(
   query: StatsQuery,
@@ -55,12 +53,13 @@ async function fetchStats(
   };
   return withAuthRetry(() =>
     query.urlId === undefined
-      ? spoo.stats.get(params, STATS_REQUEST)
-      : spoo.stats.getForLink(query.urlId, params, STATS_REQUEST),
+      ? spoo.stats.get(params)
+      : spoo.stats.getForLink(query.urlId, params),
   );
 }
 
 const fetchStatsCached = withCache(fetchStats, { maxAge: STATS_TTL_MS });
+onSessionCacheClear(() => fetchStatsCached.clearCache());
 
 export function useStats(query: StatsQuery) {
   // Stable string key — same contents → same key → no re-fire across renders.

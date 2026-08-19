@@ -4,6 +4,7 @@ import {
   invalidateCredential,
 } from "@/api/auth";
 import { CLIENT_TAG, getApiBaseUrl } from "@/constants";
+import { ensureCacheScope } from "@/lib/cache";
 import { AuthenticationError, SessionExpiredError, Spoo } from "spoo.me";
 
 let cached: { baseUrl: string; client: Spoo } | undefined;
@@ -15,9 +16,13 @@ let cached: { baseUrl: string; client: Spoo } | undefined;
 export function getSpooClient(): Spoo {
   const baseUrl = getApiBaseUrl();
   if (cached?.baseUrl === baseUrl) return cached.client;
+  ensureCacheScope(baseUrl);
   const client = new Spoo({
     baseUrl,
     clientTag: CLIENT_TAG,
+    // Raycast UIs block on these calls; never let a flaky request (or its
+    // retries, timed per attempt) hang a view for the SDK's default 60s.
+    timeout: 15_000,
     token: async () => {
       const credential = await getTokenCredential();
       if (!credential) throw new SessionExpiredError();

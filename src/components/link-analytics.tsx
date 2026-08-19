@@ -80,9 +80,9 @@ export function LinkAnalytics({ link }: { link: LinkItem }) {
     });
     try {
       const file = await withAuthRetry(() =>
-        getSpooClient().stats.export(
+        getSpooClient().stats.exportForLink(
+          link.id,
           {
-            urlId: [link.id],
             startDate: statsOptions.startDate,
             endDate: statsOptions.endDate,
           },

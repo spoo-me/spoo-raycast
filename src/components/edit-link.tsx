@@ -75,6 +75,8 @@ export function EditLinkView({ link, onMutated }: EditLinkViewProps) {
         longUrl: link.long_url ?? "",
         alias: link.alias ?? link.id,
         maxClicks: link.max_clicks ? String(link.max_clicks) : "",
+        blockBots: link.block_bots ?? false,
+        privateStats: link.private_stats ?? false,
       }}
       isLoading={submitting}
       onSubmit={handleSubmit}
