@@ -69,9 +69,17 @@ async function fetchLinks(query: ListLinksQuery): Promise<LinksSnapshot> {
     total: page.total,
     hasNext: page.hasNextPage(),
   };
-  // Only persist the default query (unfiltered list) to shared cache so other
-  // commands read a consistent snapshot.
-  if (!query.search && !query.status && (query.page ?? 1) === 1) {
+  // Only persist the baseline query (unfiltered first page, default sort and
+  // size) to shared cache so other commands read a consistent snapshot; the
+  // dashboard's total_clicks/100 query must not overwrite it.
+  const isBaseline =
+    !query.search &&
+    !query.status &&
+    (query.page ?? 1) === 1 &&
+    (query.pageSize ?? 50) === 50 &&
+    (query.sortBy ?? "created_at") === "created_at" &&
+    (query.sortOrder ?? "descending") === "descending";
+  if (isBaseline) {
     writeCached(CACHE_KEYS.links, snapshot);
   }
   return snapshot;
