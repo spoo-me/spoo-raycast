@@ -1,5 +1,5 @@
-import QRCode from "qrcode";
 import { environment } from "@raycast/api";
+import QRCode from "qrcode";
 
 export const QR_DARK = "#2E1A47";
 export const QR_LIGHT = "#FFFFFF";

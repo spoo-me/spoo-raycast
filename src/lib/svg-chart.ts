@@ -25,7 +25,7 @@ export function currentTheme(accent = "#5B7FFF"): ChartTheme {
         grid: "rgba(140,140,140,0.22)",
         track: "rgba(210,210,210,0.22)",
         axis: "rgba(140,140,140,0.45)",
-        fill: accent + "22",
+        fill: `${accent}22`,
       }
     : {
         appearance,
@@ -35,7 +35,7 @@ export function currentTheme(accent = "#5B7FFF"): ChartTheme {
         grid: "rgba(120,120,120,0.22)",
         track: "rgba(0,0,0,0.06)",
         axis: "rgba(120,120,120,0.5)",
-        fill: accent + "22",
+        fill: `${accent}22`,
       };
 }
 

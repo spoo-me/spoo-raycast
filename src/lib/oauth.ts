@@ -1,5 +1,5 @@
-import { OAuth } from "@raycast/api";
 import { APP_ID } from "@/constants";
+import { OAuth } from "@raycast/api";
 
 export const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
